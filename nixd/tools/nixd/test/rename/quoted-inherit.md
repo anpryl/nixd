@@ -41,38 +41,37 @@ let path = 1; in { inherit "path"; }
 CHECK:   "id": 4,
 CHECK-NEXT:   "jsonrpc": "2.0",
 CHECK-NEXT:   "result": {
-CHECK-NEXT:     "changes": {
-CHECK-NEXT:       "file:///quoted-inherit.nix": [
-CHECK-NEXT:         {
-CHECK-NEXT:           "newText": "renamed",
-CHECK-NEXT:           "range": {
-CHECK-NEXT:             "end": {
-CHECK-NEXT:               "character": 33,
-CHECK-NEXT:               "line": 0
-CHECK-NEXT:             },
-CHECK-NEXT:             "start": {
-CHECK-NEXT:               "character": 27,
-CHECK-NEXT:               "line": 0
-CHECK-NEXT:             }
-CHECK-NEXT:           }
-CHECK-NEXT:         },
-CHECK-NEXT:         {
-CHECK-NEXT:           "newText": "renamed",
-CHECK-NEXT:           "range": {
-CHECK-NEXT:             "end": {
-CHECK-NEXT:               "character": 8,
-CHECK-NEXT:               "line": 0
-CHECK-NEXT:             },
-CHECK-NEXT:             "start": {
-CHECK-NEXT:               "character": 4,
-CHECK-NEXT:               "line": 0
-CHECK-NEXT:             }
-CHECK-NEXT:           }
-CHECK-NEXT:         }
-CHECK-NEXT:       ]
-CHECK-NEXT:     }
+CHECK-NEXT:   "changes": {
+CHECK-NEXT:   "file:///quoted-inherit.nix": [
+CHECK-NEXT:   {
+CHECK-NEXT:   "newText": "\"path\" = renamed;",
+CHECK-NEXT:   "range": {
+CHECK-NEXT:   "end": {
+CHECK-NEXT:   "character": 34,
+CHECK-NEXT:   "line": 0
+CHECK-NEXT:   },
+CHECK-NEXT:   "start": {
+CHECK-NEXT:   "character": 19,
+CHECK-NEXT:   "line": 0
 CHECK-NEXT:   }
-CHECK-NEXT: }
+CHECK-NEXT:   }
+CHECK-NEXT:   },
+CHECK-NEXT:   {
+CHECK-NEXT:   "newText": "renamed",
+CHECK-NEXT:   "range": {
+CHECK-NEXT:   "end": {
+CHECK-NEXT:   "character": 8,
+CHECK-NEXT:   "line": 0
+CHECK-NEXT:   },
+CHECK-NEXT:   "start": {
+CHECK-NEXT:   "character": 4,
+CHECK-NEXT:   "line": 0
+CHECK-NEXT:   }
+CHECK-NEXT:   }
+CHECK-NEXT:   }
+CHECK-NEXT:   ]
+CHECK-NEXT:   }
+CHECK-NEXT:   }
 ```
 
 ```json

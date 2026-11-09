@@ -44,8 +44,9 @@ public:
     Variable,  ///< A variable bound by `rec`.
   };
 
-  using Loader =
-      std::function<std::shared_ptr<const NixTU>(const std::string &Path)>;
+  /// Loads \p Path, which it may change to the path of the open document that
+  /// is that file.
+  using Loader = std::function<std::shared_ptr<const NixTU>(std::string &Path)>;
 
   AttrResolver(std::string Path, std::shared_ptr<const NixTU> TU, Loader Load);
 

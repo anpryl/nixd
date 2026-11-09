@@ -8,16 +8,28 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/Path.h>
 
+#include <filesystem>
 #include <mutex>
 
 using namespace lspserver;
 using namespace nixd;
 
-std::shared_ptr<const NixTU> Controller::loadTU(const std::string &File) const {
+std::shared_ptr<const NixTU> Controller::loadTU(std::string &File) const {
   {
     std::lock_guard G(TUsLock);
     if (auto It = TUs.find(File); It != TUs.end())
       return It->second;
+    // \p File is canonical; the document may have been opened through a
+    // symlink.
+    for (const auto &Entry : TUs) {
+      std::error_code EC;
+      auto Canonical =
+          std::filesystem::weakly_canonical(Entry.getKey().str(), EC);
+      if (!EC && Canonical == File) {
+        File = Entry.getKey().str();
+        return Entry.getValue();
+      }
+    }
   }
   auto Buf = llvm::MemoryBuffer::getFile(File);
   if (!Buf)

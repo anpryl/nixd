@@ -70,8 +70,7 @@ void Controller::onReferences(const TextDocumentPositionParams &Params,
       const auto &PM = *TU->parentMap();
       const auto &VLA = *TU->variableLookup();
       try {
-        AttrResolver AR(File, TU,
-                        [this](const std::string &P) { return loadTU(P); });
+        AttrResolver AR(File, TU, [this](std::string &P) { return loadTU(P); });
         return findReferences(*Desc, PM, VLA, URI, TU->src(), AR);
       } catch (std::exception &E) {
         return error("references: {0}", E.what());

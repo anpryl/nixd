@@ -44,9 +44,10 @@ AttrResolver::AttrResolver(std::string Path, std::shared_ptr<const NixTU> TU,
 const AttrResolver::File *AttrResolver::file(const std::string &Path) {
   auto [It, Inserted] = Files.try_emplace(Path);
   if (Inserted) {
-    std::shared_ptr<const NixTU> TU = Load(Path);
+    std::string Opened = Path;
+    std::shared_ptr<const NixTU> TU = Load(Opened);
     if (TU && TU->ast() && TU->variableLookup() && TU->parentMap())
-      It->second = std::make_unique<File>(File{Path, std::move(TU)});
+      It->second = std::make_unique<File>(File{Opened, std::move(TU)});
   }
   return It->second.get();
 }
@@ -56,6 +57,9 @@ std::optional<AttrResolver::Found> AttrResolver::lookup(const Set &S,
   if (!Name || !Name->isStatic())
     return std::nullopt;
   const auto &Static = S.Attrs->sema().staticAttrs();
+  // A `rec` set's `__overrides` replaces its attributes when it is evaluated.
+  if (S.Attrs->sema().isRecursive() && Static.contains("__overrides"))
+    return std::nullopt;
   auto It = Static.find(Name->staticName());
   if (It == Static.end())
     return std::nullopt;
@@ -69,6 +73,12 @@ AttrResolver::bindingOf(const Definition &Def, const File &F) {
   const Node *Syntax = Def.syntax();
   if (!Syntax || Syntax->kind() != Node::NK_AttrName)
     return std::nullopt;
+  const auto &Name = static_cast<const AttrName &>(*Syntax);
+  // `s.value = ...;` merges `value` into `s`: it is not a binding of the set
+  // it is written in.
+  const Node *Up = F.TU->parentMap()->query(Name);
+  if (Up && Up->kind() == Node::NK_AttrPath)
+    return keyAt(Name, F);
   const Node *Attrs = F.TU->parentMap()->upTo(*Syntax, Node::NK_ExprAttrs);
   if (!Attrs)
     return std::nullopt;
