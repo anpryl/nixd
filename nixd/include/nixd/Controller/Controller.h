@@ -126,6 +126,9 @@ private:
     return TUs.lookup(File);
   }
 
+  /// \brief The open document \p File, or else the file parsed from disk.
+  std::shared_ptr<const NixTU> loadTU(const std::string &File) const;
+
   static std::shared_ptr<nixf::Node> getAST(const NixTU &TU) {
     using lspserver::error;
     if (!TU.ast()) {
