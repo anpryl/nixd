@@ -4,6 +4,7 @@
 /// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_rename
 
 #include "CheckReturn.h"
+#include "CodeActions/Utils.h"
 #include "Convert.h"
 #include "Definition.h"
 
@@ -80,6 +81,12 @@ struct RenameRecException : RenameException {
     return "cannot rename `rec` attribute: renaming it renames the attribute "
            "the set exports, which its users select by name; rename it by "
            "hand";
+  }
+};
+
+struct RenameInheritQuotedException : RenameException {
+  [[nodiscard]] const char *what() const noexcept override {
+    return "cannot rename: the inherited name is not a valid identifier";
   }
 };
 
@@ -191,6 +198,14 @@ const Node *inheritedName(const ExprVar &Use, const ParentMapAnalysis &PMA,
       return nullptr;
   }
   return upInherit(*Name, PMA) ? Name : nullptr;
+}
+
+/// `inherit name;` reads the variable `name`, also when it is written
+/// `inherit "name";`: as a value it is the bare identifier, not the string.
+std::string variableNamed(std::string Name) {
+  if (!isValidNixIdentifier(Name))
+    throw RenameInheritQuotedException();
+  return Name;
 }
 
 bool contains(const Node &Outer, const Node &N) {
@@ -307,7 +322,7 @@ WorkspaceEdit rename(const nixf::Node &Desc, const std::string &NewText,
     std::string Value =
         From ? selectFrom(*From, renamedSource(*From, UsesInFrom, NewText, Src),
                           Name)
-             : Name;
+             : variableNamed(definedName(*Def.syntax(), Src));
     splitInherit(*DefInh, *Def.syntax(), NewText + " = " + Value + ";", Src,
                  Edits);
   } else {
