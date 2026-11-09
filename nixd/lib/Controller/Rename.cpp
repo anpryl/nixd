@@ -75,6 +75,14 @@ struct RenameInheritNestedException : RenameException {
   }
 };
 
+struct RenameRecException : RenameException {
+  [[nodiscard]] const char *what() const noexcept override {
+    return "cannot rename `rec` attribute: renaming it renames the attribute "
+           "the set exports, which its users select by name; rename it by "
+           "hand";
+  }
+};
+
 /// The inherit that \p Name is one of the names of.
 const Inherit *upInherit(const Node &Name, const ParentMapAnalysis &PMA) {
   // The expression of `inherit (E) a;` is a child of the inherit too.
@@ -211,6 +219,9 @@ WorkspaceEdit rename(const nixf::Node &Desc, const std::string &NewText,
 
   if (Def.isBuiltin())
     throw RenameBuiltinException();
+
+  if (Def.source() == Definition::DS_Rec)
+    throw RenameRecException();
 
   // The expression `__curPos` is the position it is written at, however a
   // binding of that name is spelled (`inherit "__curPos";` too), so what
