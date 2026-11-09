@@ -52,7 +52,11 @@ struct RenameInheritNestedException : RenameException {
   }
 };
 
+/// The inherit that \p Name is one of the names of.
 const Inherit *upInherit(const Node &Name, const ParentMapAnalysis &PMA) {
+  // The expression of `inherit (E) a;` is a child of the inherit too.
+  if (Name.kind() != Node::NK_AttrName)
+    return nullptr;
   const Node *Up = PMA.query(Name);
   if (Up && Up->kind() == Node::NK_Inherit)
     return static_cast<const Inherit *>(Up);
