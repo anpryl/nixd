@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Tokens.h"
+#include "nixf/Parse/Tokens.h"
 #include "nixf/Basic/Range.h"
 
 #include <cassert>
