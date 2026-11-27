@@ -395,8 +395,7 @@ void Controller::onDefinition(const TextDocumentPositionParams &Params,
       if (const ExprVar *Var = findInheritVar(N, PM, VLA))
         return defineVar(*Var, VLA, PM, *nixpkgsClient(), URI, TU->src());
 
-      AttrResolver AR(File, TU,
-                      [this](const std::string &P) { return loadTU(P); });
+      AttrResolver AR(File, TU, [this](std::string &P) { return loadTU(P); });
       if (auto Attr = AR.attrAt(N);
           Attr && Attr->second == AttrResolver::Role::Selection) {
         const AttrResolver::File &In = *Attr->first.In;
